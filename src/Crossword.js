@@ -141,6 +141,12 @@ const Crossword = React.forwardRef(
 
     const setCellCharacter = useCallback(
       (row, col, char) => {
+
+        console.log('setCellCharacter');
+        console.log('row: ', row);
+        console.log('col: ', col);
+        console.log('char: ', char);
+        
         const cell = getCellData(row, col);
 
         if (!cell.used) {
@@ -172,6 +178,38 @@ const Crossword = React.forwardRef(
       },
       [getCellData, onCellChange]
     );
+
+    const executeSetCellCharacter = (row, col, char) => {
+      const cell = getCellData(row, col);
+
+      if (!cell.used) {
+        return;
+      }
+
+      // If the character is already the cell's guess, there's nothing to do.
+      if (cell.guess === char) {
+        return;
+      }
+
+      // update the gridData with the guess
+      setGridData(
+        produce((draft) => {
+          draft[row][col].guess = char;
+        })
+      );
+
+      // push the row/col for checking!
+      setCheckQueue(
+        produce((draft) => {
+          draft.push({ row, col });
+        })
+      );
+
+      if (onCellChange) {
+        onCellChange(row, col, char);
+      }
+
+    };
 
     const notifyCorrect = useCallback(
       (direction, number, answer) => {
@@ -619,10 +657,22 @@ const Crossword = React.forwardRef(
         },
 
         /**
+         * Remotely set a call
+         */
+        remoteSetCell: (row, col, char) => {
+          console.log('remoteSetCell invoked');
+          console.log('row: ', row);
+          console.log('col: ', col);
+          console.log('char: ', char);
+          executeSetCellCharacter(row, col, char);
+        },
+
+        /**
          * Fills all the answers in the grid and calls the `onLoadedCorrect`
          * callback with _**every**_ answer.
          */
         fillAllAnswers: () => {
+          console.log('fillAllAnswers invoked');
           setGridData(
             produce((draft) => {
               draft.forEach((rowData) => {
