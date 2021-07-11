@@ -47,6 +47,7 @@ const emptyCellData = {
   number: null,
   answer: '',
   guess: '',
+  guessIsRemote: false,
   locked: false,
   // row: r,
   // col: c,

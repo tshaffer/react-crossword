@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, {
   useCallback,
   useContext,
@@ -36,6 +37,7 @@ const defaultTheme = {
   cellBackground: 'rgb(255,255,255)',
   cellBorder: 'rgb(0,0,0)',
   textColor: 'rgb(0,0,0)',
+  remoteGuessTextColor: 'rgb(255, 0, 255)',
   numberColor: 'rgba(0,0,0, 0.25)',
   focusBackground: 'rgb(255,255,0)',
   highlightBackground: 'rgb(255,255,204)',
@@ -141,12 +143,11 @@ const Crossword = React.forwardRef(
 
     const setCellCharacter = useCallback(
       (row, col, char) => {
-
         console.log('setCellCharacter');
         console.log('row: ', row);
         console.log('col: ', col);
         console.log('char: ', char);
-        
+
         const cell = getCellData(row, col);
 
         if (!cell.used) {
@@ -162,6 +163,7 @@ const Crossword = React.forwardRef(
         setGridData(
           produce((draft) => {
             draft[row][col].guess = char;
+            draft[row][col].guessIsRemote = false;
           })
         );
 
@@ -173,13 +175,13 @@ const Crossword = React.forwardRef(
         );
 
         if (onCellChange) {
-          onCellChange(row, col, char);
+          onCellChange(row, col, char, true);
         }
       },
       [getCellData, onCellChange]
     );
 
-    const executeSetCellCharacter = (row, col, char) => {
+    const remoteSetCellCharacter = (row, col, char) => {
       const cell = getCellData(row, col);
 
       if (!cell.used) {
@@ -194,7 +196,16 @@ const Crossword = React.forwardRef(
       // update the gridData with the guess
       setGridData(
         produce((draft) => {
+          console.log('draft');
+          console.log(draft);
+          console.log('draft[row][col]');
+          console.log(draft[row][col]);
           draft[row][col].guess = char;
+          draft[row][col].guessIsRemote = true;
+          console.log('draft');
+          console.log(draft);
+          console.log('draft[row][col]');
+          console.log(draft[row][col]);
         })
       );
 
@@ -205,10 +216,13 @@ const Crossword = React.forwardRef(
         })
       );
 
-      if (onCellChange) {
-        onCellChange(row, col, char);
-      }
+      const cellAfterChange = getCellData(row, col);
+      console.log('cellAfterChange');
+      console.log(cellAfterChange);
 
+      if (onCellChange) {
+        onCellChange(row, col, char, false);
+      }
     };
 
     const notifyCorrect = useCallback(
@@ -635,6 +649,7 @@ const Crossword = React.forwardRef(
                 rowData.forEach((cellData) => {
                   if (cellData.used) {
                     cellData.guess = '';
+                    cellData.guessIsRemote = false;
                   }
                 });
               });
@@ -664,7 +679,7 @@ const Crossword = React.forwardRef(
           console.log('row: ', row);
           console.log('col: ', col);
           console.log('char: ', char);
-          executeSetCellCharacter(row, col, char);
+          remoteSetCellCharacter(row, col, char);
         },
 
         /**
@@ -881,6 +896,7 @@ Crossword.propTypes = {
     cellBorder: PropTypes.string,
     /** color for answer text (entered by the player) */
     textColor: PropTypes.string,
+    remoteGuessTextColor: PropTypes.string,
     /** color for the across/down numbers in the grid */
     numberColor: PropTypes.string,
     /** background color for the cell with focus, the one that the player is typing into */

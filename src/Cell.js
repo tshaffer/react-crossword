@@ -22,6 +22,7 @@ export default function Cell({ cellData, onClick, focus, highlight }) {
     cellBackground,
     cellBorder,
     textColor,
+    remoteGuessTextColor,
     numberColor,
     focusBackground,
     highlightBackground,
@@ -37,10 +38,17 @@ export default function Cell({ cellData, onClick, focus, highlight }) {
     [cellData, onClick]
   );
 
-  const { row, col, guess, number } = cellData;
+  const { row, col, guess, guessIsRemote, number } = cellData;
 
   const x = col * cellSize;
   const y = row * cellSize;
+
+  let cellTextColor;
+  if (guessIsRemote) {
+    cellTextColor = remoteGuessTextColor;
+  } else {
+    cellTextColor = textColor;
+  }
 
   return (
     <g
@@ -78,7 +86,7 @@ export default function Cell({ cellData, onClick, focus, highlight }) {
         y={y + cellHalf + 1} // +1 for visual alignment?
         textAnchor="middle"
         dominantBaseline="middle"
-        style={{ fill: textColor }}
+        style={{ fill: cellTextColor }}
       >
         {guess}
       </text>
@@ -92,6 +100,7 @@ Cell.propTypes = {
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
     guess: PropTypes.string.isRequired,
+    guessIsRemote: PropTypes.bool.isRequired,
     number: PropTypes.string,
   }).isRequired,
 
