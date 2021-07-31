@@ -104,6 +104,7 @@ const Crossword = React.forwardRef(
   (
     {
       data,
+      tedGuesses,
       onCorrect,
       onLoadedCorrect,
       onCrosswordCorrect,
@@ -312,9 +313,9 @@ const Crossword = React.forwardRef(
     useEffect(() => {
       setCrosswordCorrect(
         clues &&
-          bothDirections.every((direction) =>
-            clues[direction].every((clueInfo) => clueInfo.correct)
-          )
+        bothDirections.every((direction) =>
+          clues[direction].every((clueInfo) => clueInfo.correct)
+        )
       );
     }, [clues]);
 
@@ -517,12 +518,15 @@ const Crossword = React.forwardRef(
 
     // When the data changes, recalculate the gridData, size, etc.
     useEffect(() => {
+      console.log('Crossword:useEffect');
+      console.log(tedGuesses);
+
       // eslint-disable-next-line no-shadow
       const { size, gridData, clues } = createGridData(data);
 
       let loadedCorrect;
       if (useStorage) {
-        loadGuesses(gridData, defaultStorageKey);
+        loadGuesses(gridData, defaultStorageKey, tedGuesses);
         loadedCorrect = findCorrectAnswers(data, gridData);
 
         loadedCorrect.forEach(([direction, num]) => {
@@ -874,6 +878,10 @@ const clueShape = PropTypes.shape({
   col: PropTypes.number.isRequired,
 });
 
+const tedGuessShape = PropTypes.shape({
+  typedChar: PropTypes.string.isRequired,
+});
+
 Crossword.propTypes = {
   /** clue/answer data; see <a href="#cluedata-format">Clue/data format</a> for details. */
   data: PropTypes.shape({
@@ -881,6 +889,10 @@ Crossword.propTypes = {
     across: PropTypes.objectOf(clueShape),
     /** "down" clues and answers */
     down: PropTypes.objectOf(clueShape),
+  }).isRequired,
+
+  tedGuesses: PropTypes.shape({
+    ts_guesses: PropTypes.objectOf(tedGuessShape),
   }).isRequired,
 
   /** presentation values for the crossword; these override any values coming from a parent ThemeProvider context. */

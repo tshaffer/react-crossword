@@ -169,7 +169,7 @@ export function serializeGuesses(gridData) {
   return guesses;
 }
 
-export function loadGuesses(gridData, storageKey) {
+export function loadGuesses(gridData, storageKey, tedGuesses) {
   const { localStorage } = window;
   if (!localStorage) {
     return;
@@ -180,7 +180,11 @@ export function loadGuesses(gridData, storageKey) {
     return;
   }
 
-  const saveData = JSON.parse(saveRaw);
+  // const saveData = JSON.parse(saveRaw);
+  const saveData = {
+    date: Date.now(),
+    guesses: tedGuesses,
+  };
 
   // TODO: check date for expiration?
   deserializeGuesses(gridData, saveData.guesses);
