@@ -548,6 +548,9 @@ const Crossword = React.forwardRef(
 
       // TODO: track input-field focus so we don't draw highlight when we're not
       // really focused, *and* use first actual clue (whether across or down?)
+      if (onFocusedCellChange) {
+        onFocusedCellChange(0, 0, 'across');
+      }
       setFocusedRow(0);
       setFocusedCol(0);
       setCurrentDirection('across');
@@ -596,6 +599,10 @@ const Crossword = React.forwardRef(
         }
 
         setCurrentNumber(cellData[direction]);
+
+        if (onFocusedCellChange) {
+          onFocusedCellChange(row, col, direction);
+        }
 
         focus();
       },
