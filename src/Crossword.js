@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-console */
 import React, {
   useCallback,
@@ -109,6 +110,7 @@ const Crossword = React.forwardRef(
       onLoadedCorrect,
       onCrosswordCorrect,
       onCellChange,
+      onFocusedCellChange,
       useStorage,
       theme,
     },
@@ -348,6 +350,9 @@ const Crossword = React.forwardRef(
           direction = otherDirection(direction);
         }
 
+        if (onFocusedCellChange) {
+          onFocusedCellChange(row, col, direction);
+        }
         setFocusedRow(row);
         setFocusedCol(col);
         setCurrentDirection(direction);
@@ -938,6 +943,7 @@ Crossword.propTypes = {
    *  @since 2.1.0
    */
   onCellChange: PropTypes.func,
+  onFocusedCellChange: PropTypes.func,
 };
 
 Crossword.defaultProps = {
@@ -948,6 +954,7 @@ Crossword.defaultProps = {
   onLoadedCorrect: null,
   onCrosswordCorrect: null,
   onCellChange: null,
+  onFocusedCellChange: null,
 };
 
 export default Crossword;
