@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-console */
+import { cloneDeep } from 'lodash';
 import React, {
   useCallback,
   useContext,
@@ -162,6 +163,9 @@ const Crossword = React.forwardRef(
           return;
         }
 
+        // console.log('before invoking setGridData');
+        // console.log(gridData);
+
         // update the gridData with the guess
         setGridData(
           produce((draft) => {
@@ -169,6 +173,9 @@ const Crossword = React.forwardRef(
             draft[row][col].guessIsRemote = false;
           })
         );
+
+        // console.log('after invoking setGridData');
+        // console.log(gridData);
 
         // push the row/col for checking!
         setCheckQueue(
@@ -181,9 +188,12 @@ const Crossword = React.forwardRef(
           onCellChange(row, col, char, true);
         }
 
-        resetCompletedAnswers();
-        getCompletedAnswers('across');
-        getCompletedAnswers('down');
+        // resetCompletedAnswers();
+        // getCompletedAnswers('across');
+        // getCompletedAnswers('down');
+
+        // console.log('at completion of setCellCharacter');
+        // console.log(gridData);
 
       },
       [getCellData, onCellChange]
@@ -224,9 +234,9 @@ const Crossword = React.forwardRef(
         })
       );
 
-      const cellAfterChange = getCellData(row, col);
-      console.log('cellAfterChange');
-      console.log(cellAfterChange);
+      // const cellAfterChange = getCellData(row, col);
+      // console.log('cellAfterChange');
+      // console.log(cellAfterChange);
 
       if (onCellChange) {
         onCellChange(row, col, char, false);
@@ -350,42 +360,67 @@ const Crossword = React.forwardRef(
 
     const resetCompletedAnswers = () => {
 
+      console.log('gridData on entry to resetCompletedAnswers');
       console.log(gridData);
 
-      const myGridData = [];
-      for (let rowIndex = 0; rowIndex < gridData.length; rowIndex++) {
-        myGridData.push([]);
-        myGridData[rowIndex] = [];
-        const row = gridData[rowIndex];
-        for (let colIndex = 0; colIndex < row.length; colIndex++) {
-          const cellData = row[colIndex];
-          myGridData[rowIndex].push(cellData);
-        }
-      }
+      const myGridData = cloneDeep(gridData);
+      // const myGridData = [];
+      // for (let rowIndex = 0; rowIndex < gridData.length; rowIndex++) {
+      //   myGridData.push([]);
+      //   myGridData[rowIndex] = [];
+      //   const row = gridData[rowIndex];
+      //   for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      //     const cellData = row[colIndex];
+      //     myGridData[rowIndex].push(cellData);
+      //   }
+      // }
+
+      console.log('myGridData');
+      console.log(myGridData);
 
       for (let rowIndex = 0; rowIndex < myGridData.length; rowIndex++) {
         const row = myGridData[rowIndex];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
           const cellData = row[colIndex];
-          console.log(cellData);
+          cellData.inFullAnswer = false;
+          // console.log(cellData);
         }
       }
-      setGridData(gridData);
-      // setGridData(
-      //   produce((draft) => {
-      //     draft.forEach((rowData) => {
-      //       rowData.forEach((cellData) => {
-      //         if (cellData.used) {
-      //           cellData.inFullAnswer = false;
-      //         }
-      //       });
-      //     });
-      //   })
-      // );
+
+      console.log('myGridData after reset');
+      console.log(myGridData);
+
+      setGridData(myGridData);
+      console.log(gridData);
     };
 
     // Morgan feature
     const getCompletedAnswers = (direction) => {
+
+      console.log('gridData on entry to getCompletedAnswers');
+      console.log(gridData);
+
+      // data AKA cluesByDirection
+      // gridData is a two dimensional array of rows & columns and reflects the cells in the board
+      // console.log(data);
+      // console.log(gridData);
+
+      const myGridData = cloneDeep(gridData);
+
+      // const myGridData = [];
+      // for (let rowIndex = 0; rowIndex < gridData.length; rowIndex++) {
+      //   myGridData.push([]);
+      //   myGridData[rowIndex] = [];
+      //   const row = gridData[rowIndex];
+      //   for (let colIndex = 0; colIndex < row.length; colIndex++) {
+      //     const cellData = row[colIndex];
+      //     myGridData[rowIndex].push(cellData);
+      //   }
+      // }
+
+      console.log('myGridData');
+      console.log(myGridData);
+
       const tsDirection = data[direction];
       const keys = Object.keys(tsDirection);
       for (let i = 0; i < keys.length; i++) {
@@ -398,7 +433,8 @@ const Crossword = React.forwardRef(
         if (direction === 'across') {
           const startingCol = col;
           for (let j = 0; j < tsAnswerLength; j++) {
-            const tsCell = getCellData(row, startingCol + j);
+            // const tsCell = getCellData(row, startingCol + j);
+            const tsCell = myGridData[row][startingCol + j];
             if (tsCell.guess === '') {
               completelyFilledIn = false;
               break;
@@ -406,26 +442,37 @@ const Crossword = React.forwardRef(
           }
           if (completelyFilledIn) {
             for (let j = 0; j < tsAnswerLength; j++) {
-              const tsCell = getCellData(row, startingCol + j);
+              // const tsCell = getCellData(row, startingCol + j);
+              const tsCell = myGridData[row][startingCol + j];
               tsCell.inFullAnswer = true;
             }
           }
         } else {
           const startingRow = row;
           for (let j = 0; j < tsAnswerLength; j++) {
-            const tsCell = getCellData(startingRow + j, col);
+            // const tsCell = getCellData(startingRow + j, col);
+            const tsCell = myGridData[startingRow + j][col];
             if (tsCell.guess === '') {
               completelyFilledIn = false;
               break;
             }
           }
-          for (let j = 0; j < tsAnswerLength; j++) {
-            const tsCell = getCellData(startingRow + j, col);
-            tsCell.inFullAnswer = true;
+          if (completelyFilledIn) {
+            for (let j = 0; j < tsAnswerLength; j++) {
+              // const tsCell = getCellData(startingRow + j, col);
+              const tsCell = myGridData[startingRow + j][col];
+              tsCell.inFullAnswer = true;
+            }
           }
         }
-        console.log('entry for clue ', tsDirectionalEntry.clue, ' - completely filled in? ', completelyFilledIn);
+        // console.log('entry for clue ', tsDirectionalEntry.clue, ' - completely filled in? ', completelyFilledIn);
       }
+
+      console.log('myGridData after getCompletedAnswers');
+      console.log(myGridData);
+
+      setGridData(myGridData);
+      console.log(gridData);
     }
 
     // focus and movement
@@ -588,7 +635,7 @@ const Crossword = React.forwardRef(
             //   }
             //   console.log('entry for clue ', tsAcrossEntry.clue, ' - completely filled in? ', completelyFilledIn);
             // }
-            
+
             // move to beginning/end of this entry?
             const info = data[currentDirection][currentNumber]; // TEDTODO - no info about data that is entered here
             const {
@@ -913,18 +960,14 @@ const Crossword = React.forwardRef(
     const cells = [];
     if (gridData) {
 
-      console.log('check for completed entries here?');
       bothDirections.every((direction) =>
         clues[direction].every((clueInfo) => {
-          // console.log('clue: ', clues[direction]);
-          // console.log('direction ', direction);
-          // console.log('clueInfo: ', clueInfo);
           return clueInfo.correct
         })
       );
-      // console.log(correct);
 
-
+      // console.log('render, gridData: ');
+      // console.log(gridData);
 
       gridData.forEach((rowData, row) => {
         rowData.forEach((cellData, col) => {

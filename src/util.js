@@ -53,6 +53,7 @@ const emptyCellData = {
   // col: c,
   across: null,
   down: null,
+  inFullAnswer: false,
 };
 
 export function createEmptyGrid(size) {
