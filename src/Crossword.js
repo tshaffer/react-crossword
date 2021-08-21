@@ -260,7 +260,17 @@ const Crossword = React.forwardRef(
             return;
           }
 
-          const info = data[direction][number];
+          const info = data[direction][number]; // TEDTODO - data has the clues
+          // TEDTODO - each clue includes 
+          // TEDTODO - the answer
+          // TEDTODO - direction is known
+          // TEDTODO - data is an object with entries for 'across' and 'down'
+          // TEDTODO - data.across (and data.down) is a dictionary where
+          // TEDTODO - the key is a number that represents the clue number for the associated direction
+          // TEDTODO - the value is a clue
+          // TEDTODO -    answer
+          // TEDTODO -    clue
+          // TEDTODO -    col, row (used in getCellData?)
 
           // We start by looking at the current cell... if it's not correct, we
           // don't need to check anything else!
@@ -270,6 +280,10 @@ const Crossword = React.forwardRef(
             // We *could* compare cell.guess against cell.answer for all the
             // cells, but info.answer is a simple string and gets us the length
             // as well (and we only have to calulate row/col math once).
+            // TEDTODO - notes for morgan feature request
+            //    info.answer.length is the number of characters that would need to be filled in
+            //    checkCell probably retrieves the cell - see if it is non empty?
+            //    checkCell.guess === ''
             for (let i = 0; i < info.answer.length; i++) {
               const checkCell = getCellData(
                 info.row + (across ? 0 : i),
@@ -457,8 +471,42 @@ const Crossword = React.forwardRef(
 
           case 'Home':
           case 'End': {
+
+            // TEDTODO - test code
+            console.log('beginning of test code');
+            const tsDirection = 'across';
+            const tsAcrossDirection = data[tsDirection];
+            // console.log(tsAcrossDirection);
+            const keys = Object.keys(tsAcrossDirection);
+            // console.log(keys);
+            for (let i = 0; i < keys.length; i++) {
+              const tsKey = keys[i];
+              const tsAcrossEntry = tsAcrossDirection[tsKey];
+              const tsAnswer = tsAcrossEntry.answer;
+              const tsAnswerLength = tsAnswer.length;
+              // console.log(tsAnswerLength);
+              const { row, col } =  tsAcrossEntry ;
+              const startingCol = col;
+              let completelyFilledIn = true;
+              for (let j = 0; j < tsAnswerLength; j++) {
+                const tsCell = getCellData(row, startingCol + j);
+                // console.log('tsCell at ', row, j + startingCol);
+                // console.log(tsCell);
+                if (tsCell.guess === '') {
+                  // console.log('not completely filled in');
+                  completelyFilledIn = false;
+                  break;
+                }
+              }
+              console.log('entry for clue ', tsAcrossEntry.clue, ' - completely filled in? ', completelyFilledIn);
+            }
+            // for (const key in tsAcrossDirection) {
+            //   if (tsAcrossDirection.hasOwnProperty.call(tsAcrossDirection, key)) {
+            //     const element = tsAcrossDirection[key];
+            //   }
+            // }
             // move to beginning/end of this entry?
-            const info = data[currentDirection][currentNumber];
+            const info = data[currentDirection][currentNumber]; // TEDTODO - no info about data that is entered here
             const {
               answer: { length },
             } = info;
@@ -779,9 +827,28 @@ const Crossword = React.forwardRef(
     // REVIEW: do we want to recalc this all the time, or cache in state?
     const cells = [];
     if (gridData) {
+
+      console.log('checked for completed entries');
+      const correct = bothDirections.every((direction) =>
+        clues[direction].every((clueInfo) => {
+          console.log('clue: ', clues[direction]);
+          console.log('direction ', direction);
+          console.log('clueInfo: ', clueInfo);
+          return clueInfo.correct
+        })
+      );
+      console.log(correct);
+
+
+
       gridData.forEach((rowData, row) => {
         rowData.forEach((cellData, col) => {
+          // console.log('row ', row, ', col ', col);
+          // console.log(' cellData:');
+          // console.log(cellData);
+
           if (!cellData.used) {
+            // console.log('unused cell: row ', row, ', col ', col);
             return;
           }
           cells.push(
