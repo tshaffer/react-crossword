@@ -38,7 +38,7 @@ export default function Cell({ cellData, onClick, focus, highlight }) {
     [cellData, onClick]
   );
 
-  const { row, col, guess, guessIsRemote, number } = cellData;
+  const { row, col, guess, guessIsRemote, number, inFullAnswer } = cellData;
 
   const x = col * cellSize;
   const y = row * cellSize;
@@ -102,6 +102,7 @@ Cell.propTypes = {
     guess: PropTypes.string.isRequired,
     guessIsRemote: PropTypes.bool.isRequired,
     number: PropTypes.string,
+    inFullAnswer: PropTypes.bool.isRequired,
   }).isRequired,
 
   /** whether this cell has focus */

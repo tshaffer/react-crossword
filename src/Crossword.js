@@ -180,6 +180,11 @@ const Crossword = React.forwardRef(
         if (onCellChange) {
           onCellChange(row, col, char, true);
         }
+
+        resetCompletedAnswers();
+        getCompletedAnswers('across');
+        getCompletedAnswers('down');
+
       },
       [getCellData, onCellChange]
     );
@@ -343,6 +348,86 @@ const Crossword = React.forwardRef(
       }
     }, [crosswordCorrect, onCrosswordCorrect]);
 
+    const resetCompletedAnswers = () => {
+
+      console.log(gridData);
+
+      const myGridData = [];
+      for (let rowIndex = 0; rowIndex < gridData.length; rowIndex++) {
+        myGridData.push([]);
+        myGridData[rowIndex] = [];
+        const row = gridData[rowIndex];
+        for (let colIndex = 0; colIndex < row.length; colIndex++) {
+          const cellData = row[colIndex];
+          myGridData[rowIndex].push(cellData);
+        }
+      }
+
+      for (let rowIndex = 0; rowIndex < myGridData.length; rowIndex++) {
+        const row = myGridData[rowIndex];
+        for (let colIndex = 0; colIndex < row.length; colIndex++) {
+          const cellData = row[colIndex];
+          console.log(cellData);
+        }
+      }
+      setGridData(gridData);
+      // setGridData(
+      //   produce((draft) => {
+      //     draft.forEach((rowData) => {
+      //       rowData.forEach((cellData) => {
+      //         if (cellData.used) {
+      //           cellData.inFullAnswer = false;
+      //         }
+      //       });
+      //     });
+      //   })
+      // );
+    };
+
+    // Morgan feature
+    const getCompletedAnswers = (direction) => {
+      const tsDirection = data[direction];
+      const keys = Object.keys(tsDirection);
+      for (let i = 0; i < keys.length; i++) {
+        const tsKey = keys[i];
+        const tsDirectionalEntry = tsDirection[tsKey];
+        const tsAnswer = tsDirectionalEntry.answer;
+        const tsAnswerLength = tsAnswer.length;
+        const { row, col } = tsDirectionalEntry;
+        let completelyFilledIn = true;
+        if (direction === 'across') {
+          const startingCol = col;
+          for (let j = 0; j < tsAnswerLength; j++) {
+            const tsCell = getCellData(row, startingCol + j);
+            if (tsCell.guess === '') {
+              completelyFilledIn = false;
+              break;
+            }
+          }
+          if (completelyFilledIn) {
+            for (let j = 0; j < tsAnswerLength; j++) {
+              const tsCell = getCellData(row, startingCol + j);
+              tsCell.inFullAnswer = true;
+            }
+          }
+        } else {
+          const startingRow = row;
+          for (let j = 0; j < tsAnswerLength; j++) {
+            const tsCell = getCellData(startingRow + j, col);
+            if (tsCell.guess === '') {
+              completelyFilledIn = false;
+              break;
+            }
+          }
+          for (let j = 0; j < tsAnswerLength; j++) {
+            const tsCell = getCellData(startingRow + j, col);
+            tsCell.inFullAnswer = true;
+          }
+        }
+        console.log('entry for clue ', tsDirectionalEntry.clue, ' - completely filled in? ', completelyFilledIn);
+      }
+    }
+
     // focus and movement
     const focus = useCallback(() => {
       if (inputRef.current) {
@@ -473,38 +558,37 @@ const Crossword = React.forwardRef(
           case 'End': {
 
             // TEDTODO - test code
-            console.log('beginning of test code');
-            const tsDirection = 'across';
-            const tsAcrossDirection = data[tsDirection];
-            // console.log(tsAcrossDirection);
-            const keys = Object.keys(tsAcrossDirection);
-            // console.log(keys);
-            for (let i = 0; i < keys.length; i++) {
-              const tsKey = keys[i];
-              const tsAcrossEntry = tsAcrossDirection[tsKey];
-              const tsAnswer = tsAcrossEntry.answer;
-              const tsAnswerLength = tsAnswer.length;
-              // console.log(tsAnswerLength);
-              const { row, col } =  tsAcrossEntry ;
-              const startingCol = col;
-              let completelyFilledIn = true;
-              for (let j = 0; j < tsAnswerLength; j++) {
-                const tsCell = getCellData(row, startingCol + j);
-                // console.log('tsCell at ', row, j + startingCol);
-                // console.log(tsCell);
-                if (tsCell.guess === '') {
-                  // console.log('not completely filled in');
-                  completelyFilledIn = false;
-                  break;
-                }
-              }
-              console.log('entry for clue ', tsAcrossEntry.clue, ' - completely filled in? ', completelyFilledIn);
-            }
-            // for (const key in tsAcrossDirection) {
-            //   if (tsAcrossDirection.hasOwnProperty.call(tsAcrossDirection, key)) {
-            //     const element = tsAcrossDirection[key];
+            // console.log('beginning of test code');
+            // resetCompletedAnswers();
+            // getCompletedAnswers('across');
+            // getCompletedAnswers('down');
+            // const tsDirection = 'across';
+            // const tsAcrossDirection = data[tsDirection];
+            // // console.log(tsAcrossDirection);
+            // const keys = Object.keys(tsAcrossDirection);
+            // // console.log(keys);
+            // for (let i = 0; i < keys.length; i++) {
+            //   const tsKey = keys[i];
+            //   const tsAcrossEntry = tsAcrossDirection[tsKey];
+            //   const tsAnswer = tsAcrossEntry.answer;
+            //   const tsAnswerLength = tsAnswer.length;
+            //   // console.log(tsAnswerLength);
+            //   const { row, col } = tsAcrossEntry;
+            //   const startingCol = col;
+            //   let completelyFilledIn = true;
+            //   for (let j = 0; j < tsAnswerLength; j++) {
+            //     const tsCell = getCellData(row, startingCol + j);
+            //     // console.log('tsCell at ', row, j + startingCol);
+            //     // console.log(tsCell);
+            //     if (tsCell.guess === '') {
+            //       // console.log('not completely filled in');
+            //       completelyFilledIn = false;
+            //       break;
+            //     }
             //   }
+            //   console.log('entry for clue ', tsAcrossEntry.clue, ' - completely filled in? ', completelyFilledIn);
             // }
+            
             // move to beginning/end of this entry?
             const info = data[currentDirection][currentNumber]; // TEDTODO - no info about data that is entered here
             const {
@@ -714,6 +798,7 @@ const Crossword = React.forwardRef(
                   if (cellData.used) {
                     cellData.guess = '';
                     cellData.guessIsRemote = false;
+                    cellData.inFullAnswer = false;
                   }
                 });
               });
