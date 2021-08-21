@@ -571,8 +571,8 @@ const Crossword = React.forwardRef(
 
     // When the data changes, recalculate the gridData, size, etc.
     useEffect(() => {
-      console.log('Crossword:useEffect');
-      console.log(tedGuesses);
+      // console.log('Crossword:useEffect');
+      // console.log(tedGuesses);
 
       // eslint-disable-next-line no-shadow
       const { size, gridData, clues } = createGridData(data);
@@ -828,16 +828,16 @@ const Crossword = React.forwardRef(
     const cells = [];
     if (gridData) {
 
-      console.log('checked for completed entries');
-      const correct = bothDirections.every((direction) =>
+      console.log('check for completed entries here?');
+      bothDirections.every((direction) =>
         clues[direction].every((clueInfo) => {
-          console.log('clue: ', clues[direction]);
-          console.log('direction ', direction);
-          console.log('clueInfo: ', clueInfo);
+          // console.log('clue: ', clues[direction]);
+          // console.log('direction ', direction);
+          // console.log('clueInfo: ', clueInfo);
           return clueInfo.correct
         })
       );
-      console.log(correct);
+      // console.log(correct);
 
 
 
