@@ -160,10 +160,10 @@ const Crossword = React.forwardRef(
         }
 
         // update the gridData with the guess
-        const myGridData = cloneDeep(gridData);
-        myGridData[row][col].guess = char;
-        myGridData[row][col].guessIsRemote = false;
-        setGridData(myGridData);
+        const tsGridData = cloneDeep(gridData);
+        tsGridData[row][col].guess = char;
+        tsGridData[row][col].guessIsRemote = false;
+        setGridData(tsGridData);
 
         // push the row/col for checking!
         setCheckQueue(
@@ -176,13 +176,17 @@ const Crossword = React.forwardRef(
           onCellChange(row, col, char, true);
         }
 
-        resetCompletedAnswers(myGridData);
-        getCompletedAnswers(myGridData, 'across');
-        getCompletedAnswers(myGridData, 'down');
-        setGridData(myGridData);
+        refreshCompletedAnswers(tsGridData);
       },
       [getCellData, onCellChange]
     );
+
+    const refreshCompletedAnswers = (tsGridData) => {
+      resetCompletedAnswers(tsGridData);
+      getCompletedAnswers(tsGridData, 'across');
+      getCompletedAnswers(tsGridData, 'down');
+      setGridData(tsGridData);
+    }
 
     const remoteSetCellCharacter = (row, col, char) => {
       const cell = getCellData(row, col);
@@ -617,12 +621,16 @@ const Crossword = React.forwardRef(
       setCurrentDirection('across');
       setCurrentNumber('1');
 
+      refreshCompletedAnswers(gridData);
+
       setBulkChange(null);
 
       // trigger any "loaded correct" guesses...
       if (loadedCorrect && loadedCorrect.length > 0 && onLoadedCorrect) {
         onLoadedCorrect(loadedCorrect);
       }
+
+
     }, [data, onLoadedCorrect, useStorage]);
 
     useEffect(() => {
