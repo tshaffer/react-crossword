@@ -197,16 +197,8 @@ const Crossword = React.forwardRef(
       // update the gridData with the guess
       setGridData(
         produce((draft) => {
-          console.log('draft');
-          console.log(draft);
-          console.log('draft[row][col]');
-          console.log(draft[row][col]);
           draft[row][col].guess = char;
           draft[row][col].guessIsRemote = true;
-          console.log('draft');
-          console.log(draft);
-          console.log('draft[row][col]');
-          console.log(draft[row][col]);
         })
       );
 
