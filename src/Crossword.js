@@ -181,13 +181,6 @@ const Crossword = React.forwardRef(
       [getCellData, onCellChange]
     );
 
-    const refreshCompletedAnswers = (tsGridData) => {
-      resetCompletedAnswers(tsGridData);
-      getCompletedAnswers(tsGridData, 'across');
-      getCompletedAnswers(tsGridData, 'down');
-      setGridData(tsGridData);
-    }
-
     const remoteSetCellCharacter = (row, col, char) => {
       const cell = getCellData(row, col);
 
@@ -334,6 +327,13 @@ const Crossword = React.forwardRef(
     }, [crosswordCorrect, onCrosswordCorrect]);
 
 
+    const refreshCompletedAnswers = (tsGridData) => {
+      resetCompletedAnswers(tsGridData);
+      getCompletedAnswers(tsGridData, 'across');
+      getCompletedAnswers(tsGridData, 'down');
+      setGridData(tsGridData);
+    }
+
     const resetCompletedAnswers = (myGridData) => {
       for (let rowIndex = 0; rowIndex < myGridData.length; rowIndex++) {
         const row = myGridData[rowIndex];
@@ -390,6 +390,7 @@ const Crossword = React.forwardRef(
           }
         }
       }
+      // TEDTODO - I think the following is inconsistent with calling setGridData at the end of refreshCompletedAnswers
       setGridData(myGridData);
     }
 
@@ -629,7 +630,6 @@ const Crossword = React.forwardRef(
       if (loadedCorrect && loadedCorrect.length > 0 && onLoadedCorrect) {
         onLoadedCorrect(loadedCorrect);
       }
-
 
     }, [data, onLoadedCorrect, useStorage]);
 
