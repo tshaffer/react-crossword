@@ -189,9 +189,10 @@ const Crossword = React.forwardRef(
       }
 
       // If the character is already the cell's guess, there's nothing to do.
-      if (cell.guess === char) {
-        return;
-      }
+      // hack workaround
+      // if (cell.guess === char) {
+      //   return;
+      // }
 
       // update the gridData with the guess
       setGridData(
