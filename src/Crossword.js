@@ -147,10 +147,6 @@ const Crossword = React.forwardRef(
 
     const setCellCharacter = useCallback(
       (row, col, char) => {
-        console.log('setCellCharacter');
-        console.log('row: ', row);
-        console.log('col: ', col);
-        console.log('char: ', char);
 
         const cell = getCellData(row, col);
 
@@ -163,19 +159,11 @@ const Crossword = React.forwardRef(
           return;
         }
 
-        // console.log('before invoking setGridData');
-        // console.log(gridData);
-
         // update the gridData with the guess
-        setGridData(
-          produce((draft) => {
-            draft[row][col].guess = char;
-            draft[row][col].guessIsRemote = false;
-          })
-        );
-
-        // console.log('after invoking setGridData');
-        // console.log(gridData);
+        const myGridData = cloneDeep(gridData);
+        myGridData[row][col].guess = char;
+        myGridData[row][col].guessIsRemote = false;
+        setGridData(myGridData);
 
         // push the row/col for checking!
         setCheckQueue(
@@ -188,13 +176,10 @@ const Crossword = React.forwardRef(
           onCellChange(row, col, char, true);
         }
 
-        // resetCompletedAnswers();
-        // getCompletedAnswers('across');
-        // getCompletedAnswers('down');
-
-        // console.log('at completion of setCellCharacter');
-        // console.log(gridData);
-
+        resetCompletedAnswers(myGridData);
+        getCompletedAnswers(myGridData, 'across');
+        getCompletedAnswers(myGridData, 'down');
+        setGridData(myGridData);
       },
       [getCellData, onCellChange]
     );
@@ -275,17 +260,7 @@ const Crossword = React.forwardRef(
             return;
           }
 
-          const info = data[direction][number]; // TEDTODO - data has the clues
-          // TEDTODO - each clue includes 
-          // TEDTODO - the answer
-          // TEDTODO - direction is known
-          // TEDTODO - data is an object with entries for 'across' and 'down'
-          // TEDTODO - data.across (and data.down) is a dictionary where
-          // TEDTODO - the key is a number that represents the clue number for the associated direction
-          // TEDTODO - the value is a clue
-          // TEDTODO -    answer
-          // TEDTODO -    clue
-          // TEDTODO -    col, row (used in getCellData?)
+          const info = data[direction][number];
 
           // We start by looking at the current cell... if it's not correct, we
           // don't need to check anything else!
@@ -295,10 +270,6 @@ const Crossword = React.forwardRef(
             // We *could* compare cell.guess against cell.answer for all the
             // cells, but info.answer is a simple string and gets us the length
             // as well (and we only have to calulate row/col math once).
-            // TEDTODO - notes for morgan feature request
-            //    info.answer.length is the number of characters that would need to be filled in
-            //    checkCell probably retrieves the cell - see if it is non empty?
-            //    checkCell.guess === ''
             for (let i = 0; i < info.answer.length; i++) {
               const checkCell = getCellData(
                 info.row + (across ? 0 : i),
@@ -358,68 +329,21 @@ const Crossword = React.forwardRef(
       }
     }, [crosswordCorrect, onCrosswordCorrect]);
 
-    const resetCompletedAnswers = () => {
 
-      console.log('gridData on entry to resetCompletedAnswers');
-      console.log(gridData);
-
-      const myGridData = cloneDeep(gridData);
-      // const myGridData = [];
-      // for (let rowIndex = 0; rowIndex < gridData.length; rowIndex++) {
-      //   myGridData.push([]);
-      //   myGridData[rowIndex] = [];
-      //   const row = gridData[rowIndex];
-      //   for (let colIndex = 0; colIndex < row.length; colIndex++) {
-      //     const cellData = row[colIndex];
-      //     myGridData[rowIndex].push(cellData);
-      //   }
-      // }
-
-      console.log('myGridData');
-      console.log(myGridData);
-
+    const resetCompletedAnswers = (myGridData) => {
       for (let rowIndex = 0; rowIndex < myGridData.length; rowIndex++) {
         const row = myGridData[rowIndex];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
           const cellData = row[colIndex];
           cellData.inFullAnswer = false;
-          // console.log(cellData);
         }
       }
-
-      console.log('myGridData after reset');
-      console.log(myGridData);
-
-      setGridData(myGridData);
-      console.log(gridData);
     };
 
-    // Morgan feature
-    const getCompletedAnswers = (direction) => {
-
-      console.log('gridData on entry to getCompletedAnswers');
-      console.log(gridData);
+    const getCompletedAnswers = (myGridData, direction) => {
 
       // data AKA cluesByDirection
       // gridData is a two dimensional array of rows & columns and reflects the cells in the board
-      // console.log(data);
-      // console.log(gridData);
-
-      const myGridData = cloneDeep(gridData);
-
-      // const myGridData = [];
-      // for (let rowIndex = 0; rowIndex < gridData.length; rowIndex++) {
-      //   myGridData.push([]);
-      //   myGridData[rowIndex] = [];
-      //   const row = gridData[rowIndex];
-      //   for (let colIndex = 0; colIndex < row.length; colIndex++) {
-      //     const cellData = row[colIndex];
-      //     myGridData[rowIndex].push(cellData);
-      //   }
-      // }
-
-      console.log('myGridData');
-      console.log(myGridData);
 
       const tsDirection = data[direction];
       const keys = Object.keys(tsDirection);
@@ -433,7 +357,6 @@ const Crossword = React.forwardRef(
         if (direction === 'across') {
           const startingCol = col;
           for (let j = 0; j < tsAnswerLength; j++) {
-            // const tsCell = getCellData(row, startingCol + j);
             const tsCell = myGridData[row][startingCol + j];
             if (tsCell.guess === '') {
               completelyFilledIn = false;
@@ -442,7 +365,6 @@ const Crossword = React.forwardRef(
           }
           if (completelyFilledIn) {
             for (let j = 0; j < tsAnswerLength; j++) {
-              // const tsCell = getCellData(row, startingCol + j);
               const tsCell = myGridData[row][startingCol + j];
               tsCell.inFullAnswer = true;
             }
@@ -450,7 +372,6 @@ const Crossword = React.forwardRef(
         } else {
           const startingRow = row;
           for (let j = 0; j < tsAnswerLength; j++) {
-            // const tsCell = getCellData(startingRow + j, col);
             const tsCell = myGridData[startingRow + j][col];
             if (tsCell.guess === '') {
               completelyFilledIn = false;
@@ -459,20 +380,13 @@ const Crossword = React.forwardRef(
           }
           if (completelyFilledIn) {
             for (let j = 0; j < tsAnswerLength; j++) {
-              // const tsCell = getCellData(startingRow + j, col);
               const tsCell = myGridData[startingRow + j][col];
               tsCell.inFullAnswer = true;
             }
           }
         }
-        // console.log('entry for clue ', tsDirectionalEntry.clue, ' - completely filled in? ', completelyFilledIn);
       }
-
-      console.log('myGridData after getCompletedAnswers');
-      console.log(myGridData);
-
       setGridData(myGridData);
-      console.log(gridData);
     }
 
     // focus and movement
@@ -604,40 +518,8 @@ const Crossword = React.forwardRef(
           case 'Home':
           case 'End': {
 
-            // TEDTODO - test code
-            // console.log('beginning of test code');
-            // resetCompletedAnswers();
-            // getCompletedAnswers('across');
-            // getCompletedAnswers('down');
-            // const tsDirection = 'across';
-            // const tsAcrossDirection = data[tsDirection];
-            // // console.log(tsAcrossDirection);
-            // const keys = Object.keys(tsAcrossDirection);
-            // // console.log(keys);
-            // for (let i = 0; i < keys.length; i++) {
-            //   const tsKey = keys[i];
-            //   const tsAcrossEntry = tsAcrossDirection[tsKey];
-            //   const tsAnswer = tsAcrossEntry.answer;
-            //   const tsAnswerLength = tsAnswer.length;
-            //   // console.log(tsAnswerLength);
-            //   const { row, col } = tsAcrossEntry;
-            //   const startingCol = col;
-            //   let completelyFilledIn = true;
-            //   for (let j = 0; j < tsAnswerLength; j++) {
-            //     const tsCell = getCellData(row, startingCol + j);
-            //     // console.log('tsCell at ', row, j + startingCol);
-            //     // console.log(tsCell);
-            //     if (tsCell.guess === '') {
-            //       // console.log('not completely filled in');
-            //       completelyFilledIn = false;
-            //       break;
-            //     }
-            //   }
-            //   console.log('entry for clue ', tsAcrossEntry.clue, ' - completely filled in? ', completelyFilledIn);
-            // }
-
             // move to beginning/end of this entry?
-            const info = data[currentDirection][currentNumber]; // TEDTODO - no info about data that is entered here
+            const info = data[currentDirection][currentNumber];
             const {
               answer: { length },
             } = info;

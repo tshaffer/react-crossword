@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { ThemeContext } from 'styled-components';
@@ -50,6 +51,18 @@ export default function Cell({ cellData, onClick, focus, highlight }) {
     cellTextColor = textColor;
   }
 
+  const fillStyle = {
+    fill: cellTextColor
+  };
+  const strikeThroughStyle = {
+    textDecoration: 'line-through',
+    fill: cellTextColor,
+  };
+
+  const cellStyle = inFullAnswer
+    ? strikeThroughStyle
+    : fillStyle;
+
   return (
     <g
       onClick={handleClick}
@@ -64,8 +77,8 @@ export default function Cell({ cellData, onClick, focus, highlight }) {
           focus
             ? focusBackground
             : highlight
-            ? highlightBackground
-            : cellBackground
+              ? highlightBackground
+              : cellBackground
         }
         stroke={cellBorder}
         strokeWidth={cellSize / 50}
@@ -86,7 +99,7 @@ export default function Cell({ cellData, onClick, focus, highlight }) {
         y={y + cellHalf + 1} // +1 for visual alignment?
         textAnchor="middle"
         dominantBaseline="middle"
-        style={{ fill: cellTextColor }}
+        style={cellStyle}
       >
         {guess}
       </text>
